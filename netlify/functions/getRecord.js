@@ -6,7 +6,7 @@ return { statusCode: 400, body: "Missing recordId" };
 }
 
 const base = "appAfKgyPDINSxxwF"; // Your base ID
-const table = "tblQG4uQnEdidma2C"; // Your table ID
+const table = "tblGQ4uQnEdidma2C"; // Your table ID
 const pat = process.env.AIRTABLE_PAT; // Loaded from Netlify
 
 const url = `https://api.airtable.com/v0/${base}/${table}/${recordId}`;
