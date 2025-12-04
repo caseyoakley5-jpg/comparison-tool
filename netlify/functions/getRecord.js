@@ -5,28 +5,30 @@ if (!recordId) {
 return { statusCode: 400, body: "Missing recordId" };
 }
 
-const base = "appAfKgyPDINSxxwF"; // Your base ID
-const table = "tblGQ4uQnEdidma2C"; // Your table ID
-const pat = process.env.AIRTABLE_PAT; // Loaded from Netlify
+// Correct Base + Table IDs
+const base = "appAfkgyPDINSxxwF";
+const table = "tblGQ4uQnEdidma2C";
+const pat = process.env.AIRTABLE_PAT;
 
 const url = `https://api.airtable.com/v0/${base}/${table}/${recordId}`;
 
 try {
 const response = await fetch(url, {
-headers: { Authorization: `Bearer ${pat}` }
+headers: {
+Authorization: `Bearer ${pat}`,
+},
 });
 
 const data = await response.json();
 
 return {
-statusCode: 200,
-body: JSON.stringify(data)
+statusCode: response.status,
+body: JSON.stringify(data),
 };
-
-} catch (err) {
+} catch (error) {
 return {
 statusCode: 500,
-body: JSON.stringify({ error: err.message })
+body: JSON.stringify({ error: error.message }),
 };
 }
 }
