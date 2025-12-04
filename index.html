@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Case Comparison Tool</title>
+<style>
+  #case-container { display: flex; gap: 20px; margin-top: 20px; }
+  .case-card { width: 48%; background: #fafafa; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  .case-card img { max-width: 100%; border-radius: 8px; margin-bottom: 10px; }
+  #score-bar { width: 100%; height: 20px; background: #eee; border-radius: 10px; overflow: hidden; margin-top: 10px; }
+  #score-fill { height: 100%; width: 0%; background: #4caf50; transition: width 1s ease; }
+</style>
+</head>
+<body>
+<div id="comparison-tool">
+  <h2>Case Comparison</h2>
+  <div id="case-container">
+    <div class="case-card" id="case1"></div>
+    <div class="case-card" id="case2"></div>
+  </div>
+  <div id="similarity-score">
+    <h3>Similarity Score</h3>
+    <div id="score-bar"><div id="score-fill"></div></div>
+    <p id="score-text"></p>
+  </div>
+</div>
+
+<script>
+const AIRTABLE_BASE = "appAfKgyPDINSxxwF";
+const TABLE_ID = "tblksWPiciq2HAeml";
+const PAT = window.env.AIRTABLE_PAT;
+
+async function getRecord(recordId) {
+  const r = await fetch(
+    `https://api.airtable.com/v0/${AIRTABLE_BASE}/${TABLE_ID}/${recordId}`,
+    { headers: { Authorization: `Bearer ${PAT}` } }
+  );
+  return r.json();
+}
+
+function renderCase(divId, data, prefix) {
+  const fields = data.fields;
+  document.getElementById(divId).innerHTML = `
+    <h3>${fields[`${prefix} Person First Name`] ?? ""} ${fields[`${prefix} Person Last Name`] ?? ""}</h3>
+    ${
+      fields[`${prefix} Primary Photo`]
+        ? `<img src="${fields[`${prefix} Primary Photo`]}" />`
+        : `<div style="width:100%;height:200px;background:#ddd;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#555;">No Photo</div>`
+    }
+    <p><strong>Age:</strong> ${fields[`${prefix} Age`] ?? "Unknown"}</p>
+    <p><strong>Race/Ethnicity:</strong> ${fields[`${prefix} Race/Ethnicity`] ?? "Unknown"}</p>
+    <p><strong>Circumstances:</strong> ${fields[`${prefix} Circumstances`] ?? "Unknown"}</p>
+    <p><strong>Location:</strong> 
+      ${fields[`${prefix} City`] ?? ""}, 
+      ${fields[`${prefix} County`] ?? ""}, 
+      ${fields[`${prefix} State`] ?? ""}
+    </p>
+  `;
+}
+
+function scoreSimilarity(c1, c2) {
+  let score = 0;
+  let max = 6;
+  if (c1.Age && c2.Age && Math.abs(c1.Age - c2.Age) <= 5) score++;
+  if (c1["Race/Ethnicity"] && c1["Race/Ethnicity"] === c2["Race/Ethnicity"]) score++;
+  if (c1.City && c2.City && c1.City === c2.City) score++;
+  if (c1.County && c2.County && c1.County === c2.County) score++;
+  if (c1.State && c2.State && c1.State === c2.State) score++;
+  if (c1.Circumstances && c2.Circumstances && c1.Circumstances.trim() === c2.Circumstances.trim()) score++;
+  return Math.round((score / max) * 100);
+}
+
+async function loadTool() {
+  const params = new URLSearchParams(window.location.search);
+  const rec1 = params.get("case1");
+  const rec2 = params.get("case2");
+  const [c1, c2] = await Promise.all([getRecord(rec1), getRecord(rec2)]);
+  renderCase("case1", c1, "C1");
+  renderCase("case2", c2, "C2");
+  const score = scoreSimilarity(c1.fields, c2.fields);
+  document.getElementById("score-fill").style.width = score + "%";
+  document.getElementById("score-text").innerText = score + "% Match Likelihood";
+}
+
+loadTool();
+</script>
+</body>
+</html>
