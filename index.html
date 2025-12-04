@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Case Comparison</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 20px; }
+pre { background: #f3f3f3; padding: 10px; border-radius: 6px; }
+</style>
+</head>
+<body>
+<h2>Case Comparison</h2>
+
+<h3>Case 1</h3>
+<pre id="case1">Loading…</pre>
+
+<h3>Case 2</h3>
+<pre id="case2">Loading…</pre>
+
+<script>
+async function fetchRecord(id){
+const r = await fetch('/.netlify/functions/getRecord?recordId=' + id);
+return r.json();
+}
+
+async function load(){
+const p = new URLSearchParams(location.search);
+const id1 = p.get('case1');
+const id2 = p.get('case2');
+
+const c1 = await fetchRecord(id1);
+const c2 = await fetchRecord(id2);
+
+document.getElementById('case1').innerText = JSON.stringify(c1.fields, null, 2);
+document.getElementById('case2').innerText = JSON.stringify(c2.fields, null, 2);
+}
+
+load();
+</script>
+
+</body>
+</html>
+
