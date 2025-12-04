@@ -6,7 +6,7 @@ return { statusCode: 400, body: "Missing recordId" };
 }
 
 // Correct Base + Table IDs
-const base = "appAfkgyPDINSxxwF";
+const base = "appAfKgyPDlNSxxwF";
 const table = "tblGQ4uQnEdidma2C";
 const pat = process.env.AIRTABLE_PAT;
 
